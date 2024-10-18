@@ -50,68 +50,61 @@ global _start
 _start:
     mov rax, 0
     mov rbx, 0
-    mov rsi, 0
-
+    
     jmp check_lens
-
+    
 check_lens:
     mov eax, x_len
     mov ebx, y_len
     cmp eax, ebx
     jne _end
-
+    
     mov rax, 0
     mov rbx, 0
     jmp calculate_differences
 
 calculate_differences:
-    mov eax, [x + 4*rbx]
-    mov edx, [y + 4*rbx]
-    cmp eax, edx
-    jge x_greater_equal_y
-    sub edx, eax
-    mov eax, edx
-    jmp add_difference
-
-x_greater_equal_y:
-    sub eax, edx
-
-add_difference:
-    add rsi, rax
+    add eax, [x + 4*rbx]
+    sub eax, [y + 4*rbx]
+    
     inc rbx
     cmp rbx, x_len
     jne calculate_differences
+    
+    jmp print_minus_sign
 
-    jmp divide_and_print
+print_minus_sign:
+    cmp eax, 0
+    jnl print_mean
+    print minus, mlen
+    neg eax
 
-divide_and_print:
-    mov rax, rsi
-    mov rcx, 7
-    xor rdx, rdx
+print_mean:
+    mov rcx, x_len
     div rcx
-
     dprint
     cmp rdx, 0
     je print_done
-
     jmp print_point
-
+    
 print_point:
     print point, plen
     mov rbx, 0
     jmp print_f
-
+    
 print_f:
     mov rcx, 10
     mov rax, rdx
     mul rcx
-    mov rcx, 7
+    mov rcx, x_len
     div rcx
     dprint
     inc rbx
+    cmp rdx, 0
+    je print_done
     cmp rbx, 10
     jle print_f
-
+    
 print_done:
     print newline, nlen
     print done_mess, len_mess
@@ -124,16 +117,19 @@ _end:
 
 section .data
     x dd 5, 3, 2, 6, 1, 7, 4
-    x_len equ (($ - x)/4)
+    x_len equ (($ - x) / 4)
     y dd 0, 10, 1, 9, 2, 8, 5
-    y_len equ (($ - y)/4)
+    y_len equ (($ - y) / 4)
 
     newline db 0xA, 0xD
     nlen equ $ - newline
-
+    
+    minus db '-'
+    mlen equ $ - minus
+    
     point db '.'
     plen equ $ - point
-    
+
     done_mess db 'Done', 0xA, 0xD
     len_mess equ $ - done_mess
     
