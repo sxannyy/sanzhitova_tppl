@@ -23,7 +23,7 @@ class Ploc(dict):
         self.sdict = dictionary
         self.parser = Parser()
     
-    def getitem(self, cond):
+    def __getitem__(self, cond):
         if not isinstance(cond, str):
             raise TypeError("The condition must be a string")
         if not cond:

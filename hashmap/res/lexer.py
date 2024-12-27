@@ -39,8 +39,6 @@ class Lexer():
         self.forward()
         if self._current_char and self._current_char == '=':
             result += self._current_char
-            if result == '=':
-                token_type = TokenType.EQUAL
             if result == '>=':
                 token_type = TokenType.MOREEQUAL
             elif result == '<=':
@@ -57,26 +55,20 @@ class Lexer():
         else:
             raise SyntaxError("Not a valid condition")
         return Token(token_type, result)
-
+ 
     def next(self):
         while self._current_char:
-            if (self._current_char not in ['>', '<', '=', ' '] and
+            if (self._current_char not in ['>', '<', '='] and
                 not self._current_char.isdigit()):
                 self.skip()
                 continue
-            
             if self._current_char.isdigit():
                 return Token(TokenType.NUMBER, self.number())
-            
             if self._current_char in ['>', '<']:
-                return self.operators()
-            
+                return self.operators() 
             if self._current_char == '=':
                 res = self._current_char
                 self.forward()
-                return Token(TokenType.EQUAL, res)
-            if self._current_char == ' ':
-                self.forward()
-                continue
-
+                if(self._current_char and self._current_char.isdigit()):
+                    return Token(TokenType.EQUAL, res)
             raise SyntaxError("bad token")

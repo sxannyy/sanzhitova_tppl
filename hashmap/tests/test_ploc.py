@@ -11,6 +11,8 @@ def ploc_instance():
         "key2": 20,
         "key3": 30,
         "key4": 40,
+        "(key1, key2)": 50,
+        "(key5)": 60,
     })
 
 def test_operator_equal():
@@ -23,28 +25,45 @@ def test_operator_equal():
     assert operator(cond_10, token_10) is True
     assert operator(cond_20, token_10) is False
 
-def test_operator_more():
+def test_operators():
     token_10 = Token(TokenType.NUMBER, '10')
     token_20 = Token(TokenType.NUMBER, '20')
 
-    cond_10 = Condition(Token(TokenType.MORE, '>'), Number(token_10))
-    cond_20 = Condition(Token(TokenType.MORE, '>'), Number(token_20))
-
-    assert operator(cond_10, token_20) is True
+    cond_20 = Condition(Token(TokenType.MORE, '>'), Number(token_10))
     assert operator(cond_20, token_10) is False
+
+    cond_20 = Condition(Token(TokenType.MOREEQUAL, '>='), Number(token_20))
+    assert operator(cond_20, token_10) is False
+
+    cond_20 = Condition(Token(TokenType.LESS, '<'), Number(token_20))
+    assert operator(cond_20, token_10) is True
+
+    cond_20 = Condition(Token(TokenType.LESSEQUAL, '<='), Number(token_20))
+    assert operator(cond_20, token_10) is True
+
+    cond_20 = Condition(Token(TokenType.UNEQUAL, '<>'), Number(token_20))
+    assert operator(cond_20, token_10) is True
+
+    with pytest.raises(SyntaxError):
+        cond_20 = Condition(Token(TokenType.UNEQUAL, '<<<'), Number(token_20))
+        assert operator(cond_20, token_10) is True
 
 def test_getitem_invalid_type(ploc_instance):
     with pytest.raises(TypeError):
-        ploc_instance.getitem(123)
+        ploc_instance[123]
 
 def test_getitem_empty_condition(ploc_instance):
-    result = ploc_instance.getitem('')
+    result = ploc_instance['']
     assert result == {}
 
 def test_getitem_no_match(ploc_instance):
-    result = ploc_instance.getitem('key1 > 100')
+    result = ploc_instance['key1 > 100']
     assert result == {}
 
 def test_ploc_init_empty():
     ploc_empty = Ploc({})
     assert len(ploc_empty) == 0
+    
+def test_getitem_brackets(ploc_instance):
+    result = ploc_instance['>=1']
+    assert result == {'(key5)': 60}
